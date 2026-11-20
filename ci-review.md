@@ -48,23 +48,35 @@ Rules: Use actions/checkout@v6, actions/setup-node@v6 and actions/upload-artifac
   - Line 36: Keeps the report for 30 days.
 
 ## 5. The first run on GitHub
-- **Run:** Add the CI workflow · **Result:** … · **Tests:** …
-- **The report (artifact):** …
+- **Run:** Add the CI workflow · **Result:** green tick · **Tests:** 27 passed
+- **The report (artifact):** yes, playwright-report is listed under Artifacts
 
 ## 6. A red run on purpose
 - **The change:** `tests/example.spec.ts` line 6, `toBe(200)` → `toBe(201)`
-- **My prediction:** …
-- **What GitHub showed:** …
+- **My prediction:** The test step will turn red because line 6 expects status 201, but a GET request usually returns 200 (OK), not 201 (Created).
+- **What GitHub showed:** Expected: 201 · Received: 200
 
 ## 7. Fixed, and green again
-- **The fix:** line 6 back to `toBe(200)` · **Run:** Fix the expected status · **Result:** …
+- **The fix:** line 6 back to `toBe(200)` · **Run:** Fix the expected status · **Result:** green, 27 passed
 
 ## 8. Review notes for my other AI-written tests (written while CI ran)
 The API checklist: status · body · shape · negative cases (a refused request changes nothing) · own test data.
 Monday's and Tuesday's tests that I did not review in depth on those days. Each one: kept, changed or removed, and why.
 
 ### Monday: `tests/api.spec.ts`
-- "…": **kept / changed / removed**, because …
+- "anyone can read an article by its slug": **kept**, because it checks that anyone can read an article and verifies all important fields.
+- "the author can delete an article": **kept**, because it checks that the author can delete an article and confirms it is really deleted (404).
+- "creating an article without a token gives 401": **kept**, because it checks that creating an article without a token is refused with 401.
+- "reading an article that does not exist gives 404": **kept**, because it checks that reading a missing article returns 404.
+- "a user cannot change someone else's article": **kept**, because it checks that users cannot edit someone else's article and confirms nothing changed.
+- "a user cannot delete someone else's article": **kept**, because it checks that users cannot delete someone else's article and confirms the article still exists.
+
+Overall: Keep all six tests. They cover successful requests, error responses, permissions, and data integrity.
 
 ### Tuesday: `tests/contract.spec.ts`
-- "…": **kept / changed / removed**, because …
+- "GET /api/user answers with the User shape from API.md": **changed**, because: keep the 200 status check, but verify the exact User shape from API.md, including the expected fields and null values.
+- "changing an article with no token gives 401 and changes nothing": **kept**, because it checks that a request without a token is rejected and the article remains unchanged.
+- "changing an article with a wrong token gives 401 and changes nothing": **kept**, because it checks that an invalid token is rejected and nothing changes.
+- "changing someone else's article gives 403 and changes nothing": **kept**, because it checks that users cannot change someone else's article and the original data stays unchanged.
+
+Overall: Keep all four tests, but improve test 1 to check the complete API response shape.
